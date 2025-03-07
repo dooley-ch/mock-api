@@ -1,0 +1,14 @@
+###
+# Check for the root response
+
+GET http://localhost:8080
+Accept: application/text
+
+###
+# Download markets.zip file
+
+GET http://localhost:8080/api/bulk-download/s3?dataset=markets&variant=null&market=null
+Authorization: api-key QHJAWoHUEQ5C0IWGpIrgCXoxc8zbD5a0
+Accept: application/zip
+
+###

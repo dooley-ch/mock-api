@@ -18,7 +18,8 @@ import 'package:mock_api/mock_api.dart' as mock_api;
 var _config = mock_api.Configuration();
 
 final _router = Router()
-  ..get('/', _rootHandler);
+  ..get('/', _rootHandler)
+  ..mount('/api/bulk-download/s3', mock_api.SimFinApiService().router.call);
 
 Response _rootHandler(Request req) {
   return Response.ok('SimFin Download API Mock Server!\n');
@@ -29,7 +30,19 @@ void main(List<String> arguments) async {
 
   final handler = Pipeline()
       .addMiddleware(logRequests())
-      .addHandler(_router.call);
+      .addMiddleware((innerHandler) => (request) async {
+        var path = request.requestedUri.path;
+
+        if (path.contains('/api/bulk-download/s3')) {
+          var requiredApiKey = 'api-key ${_config.apiService.key}';
+          var apiKey = request.headers['Authorization'];
+          if (apiKey != requiredApiKey) {
+            return Response.unauthorized('Invalid API key provided');
+          }
+        }
+
+        return await innerHandler(request);
+      }).addHandler(_router.call);
 
   final server = await serve(handler, ip, _config.webServer.port);
   print('Server listening on port ${server.port}\n');

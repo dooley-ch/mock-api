@@ -12,3 +12,6 @@
 export 'src/config.dart' show
   findFilesFolder,
   Configuration;
+
+export 'src/simfin_api_service.dart' show
+  SimFinApiService;

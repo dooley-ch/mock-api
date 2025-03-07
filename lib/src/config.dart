@@ -65,6 +65,14 @@ class Configuration {
   SimFinApi get apiService => _apiService;
   ThrowError get throwError => _throwError;
 
+  MockError get errorToThrow  {
+    if (_mockErrors.containsKey(throwError.statusCode)) {
+      return _mockErrors[_throwError.statusCode]!;
+    }
+
+    throw ConfigurationException(message: 'Invalid errorToThrow configuration');
+  }
+
   Configuration._internal({required WebServer webServer, required SimFinApi apiService,
       required ThrowError throwError, required MockErrorsMap mockErrors }) :
       _webServer = webServer, _apiService = apiService, _throwError = throwError, _mockErrors = mockErrors;
