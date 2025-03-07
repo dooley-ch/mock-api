@@ -1,2 +1,2 @@
-# mock-api
-Example of Mocking a service api for development and testing
+A sample command-line application with an entrypoint in `bin/`, library code
+in `lib/`, and example unit test in `test/`.
