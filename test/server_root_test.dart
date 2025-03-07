@@ -1,5 +1,5 @@
 // ╔═════════════════════════════════════════════════════════════════════════════════════════════════
-// ║     mock_api.dart
+// ║     server_root_test.dart
 // ╠═════════════════════════════════════════════════════════════════════════════════════════════════
 // ║     Created: 07.03.2025
 // ║
@@ -10,28 +10,29 @@
 // ╚═════════════════════════════════════════════════════════════════════════════════════════════════
 
 import 'dart:io';
-import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart';
-import 'package:shelf_router/shelf_router.dart';
-import 'package:mock_api/mock_api.dart' as mock_api;
+import 'package:http/http.dart' as http;
+import 'package:test/test.dart';
 
-var _config = mock_api.Configuration();
+void main() {
+  final port = '8080';
+  final host = 'http://localhost:$port';
+  late Process webSvr;
 
-final _router = Router()
-  ..get('/', _rootHandler);
+  setUp(() async {
+    webSvr = await Process.start('dart', ['run', 'bin/mock_api.dart']);
+    await webSvr.stdout.first;
+  });
 
-Response _rootHandler(Request req) {
-  return Response.ok('SimFin Download API Mock Server!\n');
-}
+  tearDown(() => webSvr.kill());
 
-void main(List<String> arguments) async {
-  final ip = InternetAddress.anyIPv4;
+  test('Root', () async {
+    final response = await http.get(Uri.parse('$host/'));
+    expect(response.statusCode, 200);
+    expect(response.body, 'SimFin Download API Mock Server!\n');
+  });
 
-  final handler = Pipeline()
-      .addMiddleware(logRequests())
-      .addHandler(_router.call);
-
-  final server = await serve(handler, ip, _config.webServer.port);
-  print('Server listening on port ${server.port}\n');
-  print('Direct your browser to: http://localhost:${server.port}/');
+  test('404', () async {
+    final response = await http.get(Uri.parse('$host/foobar'));
+    expect(response.statusCode, 404);
+  });
 }
