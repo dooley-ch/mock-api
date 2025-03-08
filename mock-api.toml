@@ -15,7 +15,7 @@ version = "1.0.1"
 port = 8080
 
 [api]
-key = "QHJAWoHUEQ5C0IWGpIrgCXoxc8zbD5a0"
+key = "1234567890"
 max-calls = 60
 
 [throw-error]

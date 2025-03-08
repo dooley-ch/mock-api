@@ -8,7 +8,7 @@ Accept: application/text
 # Download markets.zip file
 
 GET http://localhost:8080/api/bulk-download/s3?dataset=markets&variant=null&market=null
-Authorization: api-key QHJAWoHUEQ5C0IWGpIrgCXoxc8zbD5a0
+Authorization: api-key 1234567890
 Accept: application/zip
 
 ###

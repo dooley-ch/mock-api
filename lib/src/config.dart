@@ -52,20 +52,26 @@ String findFilesFolder() {
   throw FolderNotFoundException(folderName: filesFolderName);
 }
 
+typedef SimFinApiInfo = ({String key, int maxCalls});
+typedef WebServerInfo = ({int port});
+typedef ThrowErrorInfo = ({bool active, int statusCode});
+typedef MockErrorInfo = ({int statusCode, String message});
+typedef MockErrorInfoMap = Map<int, MockErrorInfo>;
+
 /// Holds the application's config information
 class Configuration {
   static Configuration? _configuration;
 
-  final WebServer _webServer;
-  final SimFinApi _apiService;
-  final ThrowError _throwError;
-  final MockErrorsMap _mockErrors;
+  final WebServerInfo _webServer;
+  final SimFinApiInfo _apiService;
+  final ThrowErrorInfo _throwError;
+  final MockErrorInfoMap _mockErrors;
 
-  WebServer get webServer => _webServer;
-  SimFinApi get apiService => _apiService;
-  ThrowError get throwError => _throwError;
+  WebServerInfo get webServer => _webServer;
+  SimFinApiInfo get apiService => _apiService;
+  ThrowErrorInfo get throwError => _throwError;
 
-  MockError get errorToThrow  {
+  MockErrorInfo get errorToThrow  {
     if (_mockErrors.containsKey(throwError.statusCode)) {
       return _mockErrors[_throwError.statusCode]!;
     }
@@ -73,8 +79,8 @@ class Configuration {
     throw ConfigurationException(message: 'Invalid errorToThrow configuration');
   }
 
-  Configuration._internal({required WebServer webServer, required SimFinApi apiService,
-      required ThrowError throwError, required MockErrorsMap mockErrors }) :
+  Configuration._internal({required WebServerInfo webServer, required SimFinApiInfo apiService,
+      required ThrowErrorInfo throwError, required MockErrorInfoMap mockErrors }) :
       _webServer = webServer, _apiService = apiService, _throwError = throwError, _mockErrors = mockErrors;
 
   factory Configuration() {
@@ -87,132 +93,20 @@ class Configuration {
       var throwErrorData = configData['throw-error'];
       var mockErrorsData = configData['mock-error'];
 
-      var webServer = WebServer(port: serverData['port']);
-      var apiService = SimFinApi(key: apiData['key'], maxCalls: apiData['max-calls']);
-      var throwError = ThrowError(active: throwErrorData['active'], statusCode: throwErrorData['error']);
-
-      var errors = <int, MockError>{};
+      var errors = <int, MockErrorInfo>{};
       for (var error in mockErrorsData) {
         var status = error['status'];
         var message = error['message'];
 
-        errors[status] = MockError(statusCode: status, message: message);
+        errors[status] = (statusCode: status, message:  message);
       }
 
-      _configuration = Configuration._internal(webServer: webServer, apiService: apiService,
-          throwError: throwError, mockErrors: errors);
+      _configuration = Configuration._internal(webServer: (port: serverData['port']),
+          apiService: (key: apiData['key'], maxCalls: apiData['max-calls']),
+          throwError: (active: throwErrorData['active'], statusCode: throwErrorData['error']), mockErrors: errors);
     }
 
     return _configuration!;
   }
 
 }
-/// Holds configuration information for the web server
-class WebServer {
-  final int _port;
-
-  int get port => _port;
-
-  WebServer({required int port}) : _port = port;
-
-  @override
-  String toString() {
-    return 'WebServer(port: $_port)';
-  }
-
-  @override
-  bool operator == (Object other) =>
-      identical(this, other) ||
-      other is WebServer &&
-          runtimeType == other.runtimeType &&
-          _port == other._port;
-
-  @override
-  int get hashCode => _port.hashCode;
-}
-
-/// Holds information about the service offered
-class SimFinApi {
-  final String _key;
-  final int _maxCalls;
-
-  String get key => _key;
-  int get maxCalls => _maxCalls;
-
-  SimFinApi({required String key, required int maxCalls}) :
-        _key = key, _maxCalls = maxCalls;
-
-  @override
-  bool operator == (Object other) =>
-      identical(this, other) ||
-      other is SimFinApi &&
-          runtimeType == other.runtimeType &&
-          _key == other._key;
-
-  @override
-  int get hashCode => _key.hashCode;
-
-  @override
-  String toString() {
-    return 'SimFinApi(key: $_key)';
-  }
-}
-
-/// Holds details about throwing an error
-class ThrowError {
-  final bool _active;
-  final int _statusCode;
-
-  bool get active => _active;
-  int get statusCode => _statusCode;
-
-  ThrowError({required bool active, required int statusCode}) :
-      _active = active, _statusCode = statusCode;
-
-  @override
-  String toString() {
-    return 'ThrowError(active: $_active, statusCode: $_statusCode)';
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ThrowError &&
-          runtimeType == other.runtimeType &&
-          _active == other._active &&
-          _statusCode == other._statusCode;
-
-  @override
-  int get hashCode => _active.hashCode ^ _statusCode.hashCode;
-}
-
-/// Holds details of an error the server can return
-class MockError {
-  final int _statusCode;
-  final String _message;
-
-  int get statusCode => _statusCode;
-  String get message => _message;
-
-  MockError({required int statusCode, required String message}) :
-      _statusCode = statusCode, _message = message;
-
-  @override
-  String toString() {
-    return 'MockError(statusCode: $_statusCode, message: $_message)';
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is MockError &&
-              runtimeType == other.runtimeType &&
-              _statusCode == other._statusCode &&
-              _message == other._message;
-
-  @override
-  int get hashCode => _statusCode.hashCode ^ _message.hashCode;
-}
-
-/// A collection of MockError instances
-typedef MockErrorsMap = Map<int, MockError>;
