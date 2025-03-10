@@ -12,3 +12,9 @@ Authorization: api-key 1234567890
 Accept: application/zip
 
 ###
+# Check for the options
+
+OPTIONS http://localhost:8080
+Accept: application/text
+
+###

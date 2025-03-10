@@ -9,42 +9,67 @@
 // ║     07.03.2025: Initial version
 // ╚═════════════════════════════════════════════════════════════════════════════════════════════════
 
-import 'dart:io';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:shelf_router/shelf_router.dart';
+import 'package:shelf_cors_headers/shelf_cors_headers.dart' show corsHeaders;
 import 'package:mock_api/mock_api.dart' as mock_api;
 
-var _config = mock_api.Configuration();
+final _config = mock_api.Configuration();
+
+const customHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Origin, Content-Type, Authorization',
+  'Access-Control-Allow-Credentials': 'true',
+};
 
 final _router = Router()
   ..get('/', _rootHandler)
+  ..options('/', _optionsHandler)
   ..mount('/api/bulk-download/s3', mock_api.SimFinApiService().router.call);
 
 Response _rootHandler(Request req) {
   return Response.ok('SimFin Download API Mock Server!\n');
 }
 
-void main(List<String> arguments) async {
-  final ip = InternetAddress.anyIPv4;
+Response _optionsHandler(Request req) {
+  return Response.ok('', headers: customHeaders);
+}
 
+Middleware _validateApiKey() =>
+  (innerHandler) => (request) async {
+    var path = request.requestedUri.path;
+
+    if (path.contains('/api/bulk-download/s3')) {
+      var requiredApiKey = 'api-key ${_config.apiService.key}';
+      var apiKey = request.headers['Authorization'];
+      if (apiKey != requiredApiKey) {
+        return Response.unauthorized('Invalid API key provided');
+      }
+    }
+
+    return await innerHandler(request);
+  };
+
+Middleware _badHttpRequest() =>
+  (innerHandler) => (request) async {
+    if ((request.method != 'GET') && (request.method != 'OPTIONS')) {
+      return Response.badRequest(body: 'Method not allowed');
+    }
+
+    return await innerHandler(request);
+  };
+
+void main(List<String> arguments) async {
   final handler = Pipeline()
       .addMiddleware(logRequests())
-      .addMiddleware((innerHandler) => (request) async {
-        var path = request.requestedUri.path;
+      .addMiddleware(corsHeaders(headers: customHeaders))
+      .addMiddleware(_validateApiKey())
+      .addMiddleware(_badHttpRequest())
+      .addHandler(_router.call);
 
-        if (path.contains('/api/bulk-download/s3')) {
-          var requiredApiKey = 'api-key ${_config.apiService.key}';
-          var apiKey = request.headers['Authorization'];
-          if (apiKey != requiredApiKey) {
-            return Response.unauthorized('Invalid API key provided');
-          }
-        }
-
-        return await innerHandler(request);
-      }).addHandler(_router.call);
-
-  final server = await serve(handler, ip, _config.webServer.port);
+  final server = await serve(handler, 'localhost', _config.webServer.port);
   print('Server listening on port ${server.port}\n');
-  print('Direct your browser to: http://localhost:${server.port}/');
+  print('Direct your browser to: http://${server.address.host}:${server.port}/');
 }
