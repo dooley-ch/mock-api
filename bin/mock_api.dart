@@ -37,36 +37,12 @@ Response _optionsHandler(Request req) {
   return Response.ok('', headers: customHeaders);
 }
 
-Middleware _validateApiKey() =>
-  (innerHandler) => (request) async {
-    var path = request.requestedUri.path;
-
-    if (path.contains('/api/bulk-download/s3')) {
-      var requiredApiKey = 'api-key ${_config.apiService.key}';
-      var apiKey = request.headers['Authorization'];
-      if (apiKey != requiredApiKey) {
-        return Response.unauthorized('Invalid API key provided');
-      }
-    }
-
-    return await innerHandler(request);
-  };
-
-Middleware _badHttpRequest() =>
-  (innerHandler) => (request) async {
-    if ((request.method != 'GET') && (request.method != 'OPTIONS')) {
-      return Response.badRequest(body: 'Method not allowed');
-    }
-
-    return await innerHandler(request);
-  };
-
 void main(List<String> arguments) async {
   final handler = Pipeline()
       .addMiddleware(logRequests())
       .addMiddleware(corsHeaders(headers: customHeaders))
-      .addMiddleware(_validateApiKey())
-      .addMiddleware(_badHttpRequest())
+      .addMiddleware(mock_api.validateApiKeyHandler())
+      .addMiddleware(mock_api.badRequestHandler())
       .addHandler(_router.call);
 
   final server = await serve(handler, 'localhost', _config.webServer.port);

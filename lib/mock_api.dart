@@ -15,3 +15,7 @@ export 'src/config.dart' show
 
 export 'src/simfin_api_service.dart' show
   SimFinApiService;
+
+export 'src/middleware.dart' show
+  validateApiKeyHandler,
+  badRequestHandler;

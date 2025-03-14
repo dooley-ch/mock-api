@@ -18,3 +18,19 @@ OPTIONS http://localhost:8080
 Accept: application/text
 
 ###
+# Bad request as only GET & OPTIONS are accepted
+
+DELETE http://localhost:8080/api/bulk-download/s3?dataset=markets&variant=null&market=null
+Authorization: api-key 1234567890
+Accept: application/zip
+
+###
+
+###
+# Invalid API key
+
+GET http://localhost:8080/api/bulk-download/s3?dataset=markets&variant=null&market=null
+Authorization: api-key ABC
+Accept: application/zip
+
+###
