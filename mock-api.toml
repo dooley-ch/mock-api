@@ -16,7 +16,7 @@ port = 8080
 
 [api]
 key = "1234567890"
-max-calls = 60
+max-calls = 5
 
 [throw-error]
 active = false

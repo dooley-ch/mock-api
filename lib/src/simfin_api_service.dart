@@ -88,7 +88,7 @@ class SimFinApiService {
 
     router.get('/', (Request request) {
       // Check that we can still process requests
-      if (_requestCount > _config.apiService.maxCalls) {
+      if (_requestCount >= _config.apiService.maxCalls) {
         return Response(429, body: _noMoreRequestsAllowed);
       }
 
@@ -105,7 +105,7 @@ class SimFinApiService {
 
         var file = File(path.join(_filesFolder, requestedFileName));
         if (!file.existsSync()) {
-          return Response.notFound('Requested file not found: $requestedFileName');
+          return Response.internalServerError(body: '{"timestamp":"2025-03-14T22:13:30.144909355","status":"500","error":"Dataset not found","message":"Dataset not found"}');
         }
 
         var fileContents = file.readAsBytesSync();

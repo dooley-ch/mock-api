@@ -48,4 +48,5 @@ void main(List<String> arguments) async {
   final server = await serve(handler, 'localhost', _config.webServer.port);
   print('Server listening on port ${server.port}\n');
   print('Direct your browser to: http://${server.address.host}:${server.port}/');
+  print('For API Calls: http://${server.address.host}:${server.port}/api/bulk-download/s3');
 }

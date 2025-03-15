@@ -7,3 +7,4 @@ files/*.zip
 deploy/files/*.zip
 deploy/mock-api
 deploy/mock-api.toml
+deploy/mock_api

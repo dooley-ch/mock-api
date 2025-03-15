@@ -34,3 +34,8 @@ Authorization: api-key ABC
 Accept: application/zip
 
 ###
+# Run five times to get a 429 error
+
+GET http://localhost:8080/api/bulk-download/s3?dataset=markets&variant=null&market=null
+Authorization: api-key 1234567890
+Accept: application/zip
