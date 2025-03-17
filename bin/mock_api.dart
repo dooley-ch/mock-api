@@ -9,13 +9,9 @@
 // ║     07.03.2025: Initial version
 // ╚═════════════════════════════════════════════════════════════════════════════════════════════════
 
-import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart';
-import 'package:shelf_router/shelf_router.dart';
-import 'package:shelf_cors_headers/shelf_cors_headers.dart' show corsHeaders;
-import 'package:mock_api/mock_api.dart' as mock_api;
+import 'package:mock_api/mock_api.dart';
 
-final _config = mock_api.Configuration();
+final _config = Configuration();
 
 const customHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,7 +23,7 @@ const customHeaders = {
 final _router = Router()
   ..get('/', _rootHandler)
   ..options('/', _optionsHandler)
-  ..mount('/api/bulk-download/s3', mock_api.SimFinApiService().router.call);
+  ..mount('/api/bulk-download/s3', SimFinApiService().router.call);
 
 Response _rootHandler(Request req) {
   return Response.ok('SimFin Download API Mock Server!\n');
@@ -41,12 +37,13 @@ void main(List<String> arguments) async {
   final handler = Pipeline()
       .addMiddleware(logRequests())
       .addMiddleware(corsHeaders(headers: customHeaders))
-      .addMiddleware(mock_api.validateApiKeyHandler())
-      .addMiddleware(mock_api.badRequestHandler())
+      .addMiddleware(validateApiKeyHandler())
+      .addMiddleware(badRequestHandler())
       .addHandler(_router.call);
 
   final server = await serve(handler, 'localhost', _config.webServer.port);
   print('Server listening on port ${server.port}\n');
   print('Direct your browser to: http://${server.address.host}:${server.port}/');
   print('For API Calls: http://${server.address.host}:${server.port}/api/bulk-download/s3');
+  print('Serving files from: ${_config.webServer.filesFolder}');
 }

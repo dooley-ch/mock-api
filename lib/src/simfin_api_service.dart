@@ -10,8 +10,6 @@
 // ╚═════════════════════════════════════════════════════════════════════════════════════════════════
 
 import 'dart:io';
-import 'package:shelf/shelf.dart';
-import 'package:shelf_router/shelf_router.dart';
 import 'package:path/path.dart' as path;
 import 'package:mock_api/mock_api.dart';
 import 'exceptions.dart';
@@ -20,12 +18,15 @@ import 'exceptions.dart';
 class SimFinApiService {
   static const _noMoreRequestsAllowed = 'You have exhausted your API Request Quota';
 
-  final Configuration _config;
-  final String _filesFolder;
-  int _requestCount;
+  late final Configuration _config;
+  late final String _filesFolder;
+  int _requestCount = 0;
 
-  SimFinApiService() :
-        _config = Configuration(), _filesFolder = findFilesFolder(), _requestCount = 0;
+  SimFinApiService() {
+    _config = Configuration();
+    _filesFolder = _config.webServer.filesFolder;
+    _requestCount = 0;
+  }
 
   /// Builds the list of headers to be returned with the downloaded file
   Map<String, Object> _getResponseHeaders({required String fileName, required int fileSize}) {
@@ -90,13 +91,6 @@ class SimFinApiService {
       // Check that we can still process requests
       if (_requestCount >= _config.apiService.maxCalls) {
         return Response(429, body: _noMoreRequestsAllowed);
-      }
-
-      // Check if we should throw an error
-      if (_config.throwError.active) {
-        var error = _config.errorToThrow;
-
-        return Response(error.statusCode, body: error.message);
       }
 
       // Process the request

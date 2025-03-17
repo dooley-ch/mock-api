@@ -1,5 +1,5 @@
 # ╔═════════════════════════════════════════════════════════════════════════════════════════════════
-# ║     config.dart
+# ║     configuration.dart
 # ╠═════════════════════════════════════════════════════════════════════════════════════════════════
 # ║     Created: 07.03.2025
 # ║
@@ -13,27 +13,9 @@ version = "1.0.1"
 
 [server]
 port = 8080
+files = "/Users/jdooley/Development/mock-api/files"
 
 [api]
 key = "1234567890"
-max-calls = 5
+max-calls = 60
 
-[throw-error]
-active = false
-error = 0
-
-[[mock-error]]
-status = 401
-message = "Invalid API Key - check the key again and also if you confirmed your e-mail on registration"
-
-[[mock-error]]
-status = 404
-message = "File not found"
-
-[[mock-error]]
-status = 429
-message = "You have exhausted your API Request Quota"
-
-[[mock-error]]
-status = 500
-message = "Internal server error"

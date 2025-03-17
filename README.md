@@ -4,8 +4,8 @@
 
 ## Introduction
 
-This is an example of how to use the [Dart language](https://dart.dev/) to quickly build a API mock server to aim
-your application at during development and testing.
+This is an example of how to use the [Dart language](https://dart.dev/) to quickly build a API mock server to use
+while developing and testing an application.
 
 ## SimFin API
 
@@ -39,27 +39,23 @@ the api call.
 
 ## Operation
 
-This mock server performs a very simple function.  It serves zip files from a folder (files) located next to the deployed
-executable based on the combination of parameters send with the query to the server and documented above.  For example the
-following query:
+This mock server performs a very simple function.  It serves zip files from a folder (files) defined in the application's
+config file (mock-api.toml) a typical query would be:
 
 ```http request
 http://localhost:8080/api/bulk-download/s3?dataset=markets&variant=null&market=null
 ```
-will result in the markets.zip file being delivered to the caller assuming the file exists in the files folder.  Otherwise
-an error will be reported.
+This would result in the markets.zip file being delivered to the caller assuming the file exists in the files folder.  
+Otherwise an error will be reported.
 
-The server can be further configured via it's configuration file (mock-api.toml):
-
-- Change the port used by the server
-- Validate the api key
-- Throw one of a number of defined errors using the defined in the config file
-- limit the number of requests that can be made to the server
+The server also handles the error situations, returning a response similar to the actual serverP
+- A bad request due to an error in the provided parameters
+- No found error if the requested file is not located in the files folder
+- Exceeding the allowed number of api calls
 
 ### How to deploy the application
 
 1. Compile the application using the Dart SDK
 2. Copy the executable to the deployment folder
 3. Copy the configuration file (mock-api.toml) to the same folder and edit it if necessary
-4. Create a sub folder within the deployment folder and copy the collection of zip files to it
 5. Start the server and point your application to it.

@@ -10,7 +10,7 @@
 // ╚═════════════════════════════════════════════════════════════════════════════════════════════════
 
 import 'package:shelf/shelf.dart';
-import 'config.dart';
+import 'configuration.dart';
 
 /// Handles invalid requests to the server
 Middleware badRequestHandler() {
